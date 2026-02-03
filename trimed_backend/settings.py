@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-f4f5j7s&!r4j@y+qo(mc=l@039&%q&41+3rr_$dj51w5$&e_0j
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', '10.0.2.2']  # 10.0.2.2 pour émulateur Android
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', '10.0.2.2', 'trimedbackend.up.railway.app']  # 10.0.2.2 pour émulateur Android
 
 
 # Application definition
