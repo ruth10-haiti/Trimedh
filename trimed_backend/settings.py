@@ -9,28 +9,25 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-import dj_database_url # type: ignore
-from decouple import config
-
+import dj_database_url
 import os
 from pathlib import Path
-from datetime import timedelta  
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-DATABASE_URL = "postgresql://postgres:sWEQzLSAYFrdlMdaEedOZVLaKhpeHndv@postgres.railway.internal:5432/railway"
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-f4f5j7s&!r4j@y+qo(mc=l@039&%q&41+3rr_$dj51w5$&e_0j'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-f4f5j7s&!r4j@y+qo(mc=l@039&%q&41+3rr_$dj51w5$&e_0j')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', '10.0.2.2', 'trimedbackend.up.railway.app']  # 10.0.2.2 pour émulateur Android
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0,10.0.2.2,*.railway.app').split(',')
 
 
 # Application definition
@@ -102,21 +99,24 @@ WSGI_APPLICATION = 'trimed_backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# DATABASES = {
-#        'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'Trimedh_BD',
-#         'USER': 'postgres',
-#         'PASSWORD': ' ',
-#         'HOST': 'localhost',
-#         'PORT': '5432',
-#     }
-# } 
-DATABASES = {
-    'default': dj_database_url.parse(
-        config('DATABASE_URL')
-    )
-}
+# Database configuration
+if os.environ.get('DATABASE_URL'):
+    # Production (Railway)
+    DATABASES = {
+        'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
+    }
+else:
+    # Development
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'Trimedh_BD',
+            'USER': 'postgres',
+            'PASSWORD': '',
+            'HOST': 'localhost',
+            'PORT': '5432',
+        }
+    }
 
 
 # Modèle d'utilisateur personnalisé
@@ -178,17 +178,17 @@ USE_I18N = True
 
 USE_TZ = True
 
-# CORS pour Flutter
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
-    "http://10.0.2.2:8000",  # Émulateur Android
-]
+# CORS Configuration
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+else:
+    CORS_ALLOWED_ORIGINS = [
+        "https://your-frontend-domain.com",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ]
 
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_ALL_ORIGINS = True  # Pour développement seulement
 
 
 # Static files (CSS, JavaScript, Images)
