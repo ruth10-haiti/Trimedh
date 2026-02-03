@@ -1,2 +1,2 @@
-web: python deploy.py && gunicorn trimed_backend.wsgi:application --bind 0.0.0.0:$PORT
-release: python force_migrate.py
+web: python manage.py migrate && python create_superuser.py && python manage.py runserver 0.0.0.0:$PORT
+release: python manage.py migrate && python create_superuser.py
