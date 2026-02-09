@@ -1,0 +1,2 @@
+gunicorn==25.0.2
+packaging==26.0
