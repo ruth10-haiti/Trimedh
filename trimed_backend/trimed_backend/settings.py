@@ -35,6 +35,13 @@ STATIC_URL = '/static/'
 
 #ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', '192.168.1.61', '*']  
 
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '.onrender.com',  
+    'https://trimedh-service.onrender.com', 
+]
+
 
 # Application definition
 
@@ -117,7 +124,7 @@ WSGI_APPLICATION = 'trimed_backend.wsgi.application'
 # } 
 
 DATABASES = {
-     'default' : dj_database_url.parse(config('DATABASE_URL'))
+    'default' : dj_database_url.parse(config('DATABASE_URL'))
      
 }
 # Modèle d'utilisateur personnalisé
