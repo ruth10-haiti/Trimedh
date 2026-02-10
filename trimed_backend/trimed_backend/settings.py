@@ -26,8 +26,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-#DEBUG = False
+DEBUG = True
+# # Pour développement local
+# DEBUG = True
 
+# # Pour production 
+# if 'RENDER' in os.environ:
+#     DEBUG = False
+#     ALLOWED_HOSTS = [os.environ.get('https://trimedh-service.onrender.com'), 'localhost', '127.0.0.1']
+# else:
+#     DEBUG = True
+#     ALLOWED_HOSTS = ['localhost', '127.0.0.1', '10.0.2.2']
 
 # Fichiers statiques
 STATIC_URL = '/static/'
@@ -39,7 +48,7 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     '.onrender.com',  
-    'https://trimedh-service.onrender.com', 
+    'trimedh-service.onrender.com', 
 ]
 
 
