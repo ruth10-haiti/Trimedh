@@ -46,7 +46,8 @@ class Utilisateur(AbstractBaseUser, PermissionsMixin):
         unique=True,
         validators=[EmailValidator()]
     )
-
+  
+    
     role = models.CharField(
         max_length=50,
         choices=Role.choices,
