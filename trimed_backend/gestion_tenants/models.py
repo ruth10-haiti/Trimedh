@@ -1,9 +1,10 @@
 from django.db import models
 from django.utils import timezone
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.conf import settings
+
 
 class Tenant(models.Model):
-    """TABLE Tenant - Établissement hospitalier"""
     
     class StatutVerificationDocument(models.TextChoices):
         EN_ATTENTE = 'en_attente', 'En attente'
@@ -45,9 +46,8 @@ class Tenant(models.Model):
         choices=TypeAbonnement.choices,
         default=TypeAbonnement.BASIC
     )
-    
     verifie_par = models.ForeignKey(
-        'comptes.Utilisateur',
+        settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -56,14 +56,14 @@ class Tenant(models.Model):
     date_verification = models.DateTimeField(null=True, blank=True)
     cree_le = models.DateTimeField(default=timezone.now)
     cree_par_utilisateur = models.ForeignKey(
-        'comptes.Utilisateur',
+        settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name='tenants_crees'
     )
     proprietaire_utilisateur = models.ForeignKey(
-        'comptes.Utilisateur',
+    settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,

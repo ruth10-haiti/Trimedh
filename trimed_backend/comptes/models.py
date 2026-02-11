@@ -5,9 +5,8 @@ from django.utils import timezone
 from django.core.validators import EmailValidator
 
 class GestionnaireUtilisateur(BaseUserManager):
-    """Gestionnaire personnalisé pour les utilisateurs"""
     
-    def creer_utilisateur(self, email, nom_complet, mot_de_passe=None, **extra_fields):
+    def create_user(self, email, nom_complet, mot_de_passe=None, **extra_fields):
         if not email:
             raise ValueError('L\'email est obligatoire')
         
@@ -21,17 +20,15 @@ class GestionnaireUtilisateur(BaseUserManager):
         utilisateur.save(using=self._db)
         return utilisateur
     
-    def creer_superutilisateur(self, email, nom_complet, mot_de_passe=None, **extra_fields):
+    def create_superuser(self, email, nom_complet, mot_de_passe=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('role', 'admin-systeme')
         
-        return self.creer_utilisateur(email, nom_complet, mot_de_passe, **extra_fields)
+        return self.create_user(email, nom_complet, mot_de_passe, **extra_fields)
 
 class Utilisateur(AbstractBaseUser, PermissionsMixin):
-    """
-    TABLE Utilisateur - Modèle personnalisé
-    """
+    
     
     class Role(models.TextChoices):
         ADMIN_SYSTEME = 'admin-systeme', 'Administrateur Système'
@@ -49,8 +46,7 @@ class Utilisateur(AbstractBaseUser, PermissionsMixin):
         unique=True,
         validators=[EmailValidator()]
     )
-    mot_de_passe = models.CharField(max_length=255, editable=False)
-    
+
     role = models.CharField(
         max_length=50,
         choices=Role.choices,
@@ -68,12 +64,10 @@ class Utilisateur(AbstractBaseUser, PermissionsMixin):
     
     cree_le = models.DateTimeField(default=timezone.now)
     
-    # Champs Django requis
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     derniere_connexion = models.DateTimeField(null=True, blank=True)
     
-    # Relations spécifiques (pour les signaux)
     derniere_modification = models.DateTimeField(auto_now=True)
     modifie_par = models.ForeignKey(
         'self',

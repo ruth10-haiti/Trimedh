@@ -15,22 +15,13 @@ from datetime import timedelta
 from decouple import config
 import dj_database_url
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config('SECRET_KEY')
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-# # Pour développement local
-# DEBUG = True
-
-# # Pour production 
+ 
 # if 'RENDER' in os.environ:
 #     DEBUG = False
 #     ALLOWED_HOSTS = [os.environ.get('https://trimedh-service.onrender.com'), 'localhost', '127.0.0.1']
@@ -38,21 +29,17 @@ DEBUG = True
 #     DEBUG = True
 #     ALLOWED_HOSTS = ['localhost', '127.0.0.1', '10.0.2.2']
 
-# Fichiers statiques
-STATIC_URL = '/static/'
-#STATIC_ROOT = '/home/votrenom/nom_projet/static'
 
-#ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', '192.168.1.61', '*']  
+STATIC_URL = '/static/'
+
 
 ALLOWED_HOSTS = [
+    'trimedh-service.onrender.com',
     'localhost',
     '127.0.0.1',
-    '.onrender.com',  
-    'trimedh-service.onrender.com', 
+    '.onrender.com',    
 ]
 
-
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -63,7 +50,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     
-    # Applications tierces
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
@@ -99,6 +85,13 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'trimed_backend.urls'
+
+#CORS_ALLOW_ALL_ORIGINS = True  
+
+CORS_ALLOWED_ORIGINS = [
+    "https://trimedh-service.onrender.com",
+    "http://localhost:8080",
+]
 
 TEMPLATES = [
     {
@@ -136,10 +129,9 @@ DATABASES = {
     'default' : dj_database_url.parse(config('DATABASE_URL'))
      
 }
-# Modèle d'utilisateur personnalisé
+
 AUTH_USER_MODEL = 'comptes.Utilisateur'
-# CORS
-CORS_ORIGIN_ALLOW_ALL = True
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -153,7 +145,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
 }
-# Configuration JWT
+
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
@@ -195,17 +187,8 @@ USE_I18N = True
 
 USE_TZ = True
 
-# CORS pour Flutter
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
-    "http://10.0.2.2:8000",  # Émulateur Android
-]
 
 CORS_ALLOW_CREDENTIALS = True
-#CORS_ALLOW_ALL_ORIGINS = True  # Pour développement seulement
 
 
 # Static files (CSS, JavaScript, Images)
@@ -214,7 +197,7 @@ CORS_ALLOW_CREDENTIALS = True
 STATIC_URL = 'static/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
