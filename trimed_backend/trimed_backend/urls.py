@@ -37,7 +37,7 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('Trimedh/', admin.site.urls),
     # Endpoints de santé
     path('', views.api_info, name='api-info'),
     path('health/', views.health_check, name='health-check'),
