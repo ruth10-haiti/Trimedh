@@ -62,7 +62,7 @@ class InscriptionSerializer(serializers.ModelSerializer):
         validated_data.pop('confirm_password')
         password = validated_data.pop('password')
         
-        utilisateur = Utilisateur.objects.create_utilisateur(
+        utilisateur = Utilisateur.objects.create_user(
             email=validated_data['email'],
             nom_complet=validated_data['nom_complet'],
             mot_de_passe=password,
