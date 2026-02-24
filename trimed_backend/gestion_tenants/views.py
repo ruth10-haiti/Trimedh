@@ -1,7 +1,7 @@
 from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny  
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
 from .models import Tenant, ParametreHopital
@@ -23,10 +23,16 @@ class TenantViewSet(viewsets.ModelViewSet):
         Permissions personnalisées selon l'action
         """
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            # Les actions d'écriture nécessitent admin système
             permission_classes = [IsAuthenticated, EstAdminSysteme]
         elif self.action == 'retrieve':
+            # Consulter un hôpital spécifique nécessite juste authentification
             permission_classes = [IsAuthenticated]
-        else:  # list
+        elif self.action == 'list':
+            # La liste des hôpitaux est publique (pour l'inscription)
+            permission_classes = [AllowAny]
+        else:
+            # Pour les actions personnalisées (verifier_documents, statistiques)
             permission_classes = [IsAuthenticated, EstAdminSysteme]
         return [permission() for permission in permission_classes]
     
@@ -36,6 +42,14 @@ class TenantViewSet(viewsets.ModelViewSet):
         """
         queryset = super().get_queryset()
         user = self.request.user
+        
+        # Pour l'action 'list' (publique), retourner tous les tenants
+        if self.action == 'list':
+            return queryset
+        
+        # Si l'utilisateur n'est pas authentifié, retourner queryset vide
+        if not user or not user.is_authenticated:
+            return Tenant.objects.none()
         
         if user.role == 'admin-systeme':
             return queryset
