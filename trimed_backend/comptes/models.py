@@ -5,6 +5,9 @@ from django.utils import timezone
 from django.core.validators import EmailValidator
 
 class GestionnaireUtilisateur(BaseUserManager):
+    @property
+    def id(self):
+       return self.utilisateur_id
     
     def create_user(self, email, nom_complet, mot_de_passe=None, **extra_fields):
         if not email:
