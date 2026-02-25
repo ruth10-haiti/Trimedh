@@ -46,30 +46,53 @@ class UtilisateurSerializer(serializers.ModelSerializer):
 class InscriptionSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, min_length=8)
     confirm_password = serializers.CharField(write_only=True, required=True)
-    
+    # Accepter un dictionnaire de données d'hôpital au lieu d'un ID
+    hopital = serializers.DictField(required=False, allow_null=True)
     class Meta:
         model = Utilisateur
         fields = ['nom_complet', 'email', 'password', 'confirm_password', 'role', 'hopital']
-    
     def validate(self, data):
         if data['password'] != data['confirm_password']:
             raise serializers.ValidationError({
                 'password': 'Les mots de passe ne correspondent pas'
             })
         return data
-    
     def create(self, validated_data):
         validated_data.pop('confirm_password')
         password = validated_data.pop('password')
-        
-        utilisateur = Utilisateur.objects.create_user(
+        hopital_data = validated_data.pop('hopital', None)
+        # Créer le Tenant (hôpital) si des données sont fournies
+        tenant = None
+        if hopital_data:
+            from gestion_tenants.models import Tenant
+            try:
+                nombre_de_lits = int(hopital_data.get('nombre_de_lits', 1))
+            except (ValueError, TypeError):
+                nombre_de_lits = 1
+            tenant = Tenant.objects.create(
+                nom=hopital_data.get('nom', ''),
+                adresse=hopital_data.get('adresse', ''),
+                telephone=hopital_data.get('telephone', ''),
+                email_professionnel=hopital_data.get('email_professionnel', ''),
+                directeur=hopital_data.get('directeur', ''),
+                nombre_de_lits=nombre_de_lits,
+                numero_enregistrement=hopital_data.get('numero_enregistrement', ''),
+                statut='inactif',
+                statut_verification_document='en_attente',
+            )
+        # Créer l'utilisateur lié au tenant (ou sans tenant si non fourni)
+        utilisateur = Utilisateur.objects.creer_utilisateur(
             email=validated_data['email'],
             nom_complet=validated_data['nom_complet'],
             mot_de_passe=password,
-            role=validated_data.get('role', 'patient'),
-            hopital=validated_data.get('hopital')
+            role=validated_data.get('role', 'proprietaire-hopital'),
+            hopital=tenant
         )
-        
+        # Lier l'utilisateur comme propriétaire du tenant
+        if tenant:
+            tenant.proprietaire_utilisateur = utilisateur
+            tenant.cree_par_utilisateur = utilisateur
+            tenant.save(update_fields=['proprietaire_utilisateur', 'cree_par_utilisateur'])
         return utilisateur
 
 class LoginSerializer(serializers.Serializer):
