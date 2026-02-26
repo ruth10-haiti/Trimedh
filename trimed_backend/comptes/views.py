@@ -194,33 +194,33 @@ class LogoutView(APIView):
             )
 
 class InscriptionView(APIView):
-    """Vue pour l'inscription (principalement pour les patients)"""
+    """Vue pour l'inscription (pour les patients et personnel des hôpitaux existants)"""
     
     permission_classes = [AllowAny]
     
-def post(self, request):
-    serializer = InscriptionSerializer(data=request.data)
-    if serializer.is_valid():
-        utilisateur = serializer.save()
+    def post(self, request):
+        serializer = InscriptionSerializer(data=request.data)
+        if serializer.is_valid():
+            utilisateur = serializer.save()
 
-        # Génération des tokens JWT — avec fallback manuel si for_user échoue
-        try:
-            refresh = RefreshToken.for_user(utilisateur)
-            access_token = str(refresh.access_token)
-            refresh_token = str(refresh)
-        except Exception:
-            # Fallback: créer le token manuellement avec utilisateur_id
-            refresh = RefreshToken()
-            refresh['user_id'] = utilisateur.utilisateur_id
-            access_token = str(refresh.access_token)
-            refresh_token = str(refresh)
+            # Génération des tokens JWT
+            try:
+                refresh = RefreshToken.for_user(utilisateur)
+                access_token = str(refresh.access_token)
+                refresh_token = str(refresh)
+            except Exception:
+                # Fallback: créer le token manuellement avec utilisateur_id
+                refresh = RefreshToken()
+                refresh['user_id'] = utilisateur.utilisateur_id
+                access_token = str(refresh.access_token)
+                refresh_token = str(refresh)
 
-        user_serializer = UtilisateurSerializer(utilisateur)
-        return Response({
-            'refresh': refresh_token,
-            'access': access_token,
-            'utilisateur': user_serializer.data,
-            'message': 'Inscription réussie'
-        }, status=status.HTTP_201_CREATED)
+            user_serializer = UtilisateurSerializer(utilisateur)
+            return Response({
+                'refresh': refresh_token,
+                'access': access_token,
+                'utilisateur': user_serializer.data,
+                'message': 'Inscription réussie'
+            }, status=status.HTTP_201_CREATED)
 
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

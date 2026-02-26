@@ -7,6 +7,10 @@ from django.utils import timezone
 from .models import Tenant, ParametreHopital
 from .serializers import TenantSerializer, ParametreHopitalSerializer
 from comptes.permissions import EstAdminSysteme, EstProprietaireHopital
+from rest_framework import generics, permissions
+from rest_framework.response import Response
+from .models import Tenant
+from .serializers import TenantSerializer  
 
 class TenantViewSet(viewsets.ModelViewSet):
     """
@@ -143,3 +147,12 @@ class ParametreHopitalViewSet(viewsets.ModelViewSet):
             return queryset.filter(tenant=user.hopital)
         
         return ParametreHopital.objects.none()
+
+class TenantListView(generics.ListAPIView):
+    """Vue pour lister les hôpitaux actifs"""
+    permission_classes = [permissions.AllowAny] 
+    serializer_class = TenantSerializer
+    
+    def get_queryset(self):
+        # Ne retourner que les hôpitaux actifs
+        return Tenant.objects.filter(statut='actif').order_by('nom')
