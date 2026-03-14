@@ -17,11 +17,11 @@ def health_check(request):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def api_info(request):
-    """Informations sur l'API"""
+    """Informations sur Trimedh"""
     return Response({
-        'name': 'Trimed Backend API',
+        'name': 'Trimedh ',
         'version': '1.0.0',
-        'description': 'API pour la gestion hospitalière',
+        'description': 'APPLi pour la gestion hospitalière',
         'endpoints': {
             'auth': '/api/comptes/',
             'patients': '/api/patients/',
