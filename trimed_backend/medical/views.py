@@ -8,12 +8,12 @@ from django.utils import timezone
 from datetime import timedelta, datetime
 from .models import (
     Specialite, Medecin, Consultation, Ordonnance,
-    ExamenMedical, Prescription
+    ExamenMedical, Prescription, GroupeSanguin
 )
 from .serializers import (
     SpecialiteSerializer, MedecinSerializer,
     ConsultationSerializer, OrdonnanceSerializer,
-    ExamenMedicalSerializer, PrescriptionSerializer
+    ExamenMedicalSerializer, PrescriptionSerializer,GroupeSanguinSerializer
 )
 from comptes.permissions import EstMedecin, EstPersonnel, EstPatient
 from patients.permissions import PeutAccederPatient
@@ -189,3 +189,107 @@ class ConsultationViewSet(viewsets.ModelViewSet):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class SpecialiteViewSet(viewsets.ModelViewSet):
+    """ViewSet pour les spécialités médicales"""
+    queryset = Specialite.objects.all()
+    serializer_class = SpecialiteSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    search_fields = ['nom_specialite', 'description']
+    filterset_fields = ['actif']
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        user = self.request.user
+        
+        # Protection pour Swagger
+        if getattr(self, 'swagger_fake_view', False):
+            return queryset.none()
+        
+        # Filtrer par tenant
+        if user and user.is_authenticated and user.hopital:
+            queryset = queryset.filter(hopital=user.hopital)
+        
+        return queryset
+
+class GroupeSanguinViewSet(viewsets.ReadOnlyModelViewSet):
+    """ViewSet pour les groupes sanguins (lecture seule)"""
+    queryset = GroupeSanguin.objects.all()
+    serializer_class = GroupeSanguinSerializer
+    permission_classes = [IsAuthenticated]
+
+class OrdonnanceViewSet(viewsets.ModelViewSet):
+    """ViewSet pour les ordonnances"""
+    queryset = Ordonnance.objects.all()
+    serializer_class = OrdonnanceSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['patient', 'medecin', 'consultation']
+    search_fields = ['patient__nom', 'patient__prenom', 'medecin__nom']
+    ordering_fields = ['date_ordonnance', 'created_at']
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        user = self.request.user
+        
+        # Protection pour Swagger
+        if getattr(self, 'swagger_fake_view', False):
+            return queryset.none()
+        
+        # Filtrer par tenant
+        if user and user.is_authenticated and user.hopital:
+            queryset = queryset.filter(tenant=user.hopital)
+        
+        return queryset
+    
+    def perform_create(self, serializer):
+        serializer.save(tenant=self.request.user.hopital)
+
+class ExamenMedicalViewSet(viewsets.ModelViewSet):
+    """ViewSet pour les examens médicaux"""
+    queryset = ExamenMedical.objects.all()
+    serializer_class = ExamenMedicalSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ['patient', 'consultation', 'type_examen']
+    search_fields = ['nom_examen', 'resultat']
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        user = self.request.user
+        
+        # Protection pour Swagger
+        if getattr(self, 'swagger_fake_view', False):
+            return queryset.none()
+        
+        # Filtrer par tenant
+        if user and user.is_authenticated and user.hopital:
+            queryset = queryset.filter(tenant=user.hopital)
+        
+        return queryset
+    
+    def perform_create(self, serializer):
+        serializer.save(tenant=self.request.user.hopital)
+
+class PrescriptionViewSet(viewsets.ModelViewSet):
+    """ViewSet pour les prescriptions"""
+    queryset = Prescription.objects.all()
+    serializer_class = PrescriptionSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ['ordonnance', 'medicament']
+    search_fields = ['medicament__nom', 'instructions']
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        user = self.request.user
+        
+        # Protection pour Swagger
+        if getattr(self, 'swagger_fake_view', False):
+            return queryset.none()
+        
+        # Filtrer par tenant
+        if user and user.is_authenticated and user.hopital:
+            queryset = queryset.filter(ordonnance__tenant=user.hopital)
+        
+        return queryset

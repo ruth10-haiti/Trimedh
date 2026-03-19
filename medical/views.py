@@ -3,9 +3,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
-from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from datetime import datetime, timedelta
+from datetime import timedelta
 from .models import (
     Medecin, Specialite, GroupeSanguin, Consultation,
     Ordonnance, ExamenMedical, Prescription
@@ -85,14 +84,12 @@ class MedecinViewSet(viewsets.ModelViewSet):
         
         if date_debut:
             try:
-                date_debut = datetime.strptime(date_debut, '%Y-%m-%d').date()
                 consultations = consultations.filter(date_consultation__date__gte=date_debut)
             except ValueError:
                 pass
         
         if date_fin:
             try:
-                date_fin = datetime.strptime(date_fin, '%Y-%m-%d').date()
                 consultations = consultations.filter(date_consultation__date__lte=date_fin)
             except ValueError:
                 pass
@@ -177,14 +174,12 @@ class ConsultationViewSet(viewsets.ModelViewSet):
         
         if date_debut:
             try:
-                date_debut = datetime.strptime(date_debut, '%Y-%m-%d').date()
                 queryset = queryset.filter(date_consultation__date__gte=date_debut)
             except ValueError:
                 pass
         
         if date_fin:
             try:
-                date_fin = datetime.strptime(date_fin, '%Y-%m-%d').date()
                 queryset = queryset.filter(date_consultation__date__lte=date_fin)
             except ValueError:
                 pass
@@ -217,11 +212,11 @@ class ConsultationViewSet(viewsets.ModelViewSet):
         ordonnance_data['consultation'] = consultation.consultation_id
         ordonnance_data['patient'] = consultation.patient.patient_id
         ordonnance_data['medecin'] = consultation.medecin.medecin_id
-        ordonnance_data['date_ordonnance'] = timezone.now()
+        ordonnance_data['date_ordonnance'] = timezone.now().isoformat()
         
         serializer = OrdonnanceCreateSerializer(data=ordonnance_data, context={'request': request})
         if serializer.is_valid():
-            ordonnance = serializer.save()
+            ordonnance = serializer.save(tenant=request.user.hopital)
             return Response(OrdonnanceSerializer(ordonnance).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
@@ -249,9 +244,9 @@ class ConsultationViewSet(viewsets.ModelViewSet):
         examen_data['patient'] = consultation.patient.patient_id
         examen_data['consultation'] = consultation.consultation_id
         examen_data['medecin_prescripteur'] = consultation.medecin.medecin_id
-        examen_data['date_examen'] = request.data.get('date_examen', timezone.now())
+        examen_data['date_examen'] = request.data.get('date_examen', timezone.now().isoformat())
         
-        serializer = ExamenMedicalSerializer(data=examen_data)
+        serializer = ExamenMedicalSerializer(data=examen_data, context={'request': request})
         if serializer.is_valid():
             examen = serializer.save()
             return Response(ExamenMedicalSerializer(examen).data, status=status.HTTP_201_CREATED)
