@@ -1,6 +1,5 @@
 Django==4.2.13
 djangorestframework==3.14.0
-djangorestframework-simplejwt==5.3.0
 psycopg[binary]>=3.3.2  
 django-cors-headers==4.3.1
 drf-yasg==1.21.7
@@ -26,9 +25,7 @@ Django==6.0.2
 django-cors-headers==4.9.0
 django-extensions==4.1
 django-filter==25.2
-djangorestframework==3.16.1
 djangorestframework_simplejwt==5.5.1
-drf-yasg==1.21.14
 gunicorn==25.0.2
 inflection==0.5.1
 packaging==26.0
