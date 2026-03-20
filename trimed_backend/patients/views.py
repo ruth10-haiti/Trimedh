@@ -172,4 +172,7 @@ class PatientViewSet(viewsets.ModelViewSet):
 class AdressePatientViewSet(viewsets.ModelViewSet):
     queryset = AdressePatient.objects.all()
     serializer_class = AdressePatientSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]    
+class SuiviPatientViewSet(viewsets.ModelViewSet):
+    queryset = SuiviPatient.objects.all()
+    serializer_class = SuiviPatientSerializer
