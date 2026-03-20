@@ -173,6 +173,7 @@ class PatientViewSet(viewsets.ModelViewSet):
             serializer.save(patient=patient)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class AdressePatientViewSet(viewsets.ModelViewSet):
     queryset = AdressePatient.objects.all()
     serializer_class = AdressePatientSerializer
